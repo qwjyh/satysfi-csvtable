@@ -1,11 +1,13 @@
-@require: stdjareport
+@require: stdjabook
 @require: itemize
 @require: annot
+@require: code
 
 @require: base/typeset/base
 @require: base/float
 
-@require: csvtable/csvtable
+% @require: csvtable/csvtable
+@import: ../src/csvtable
 
 % Document-local function definition
 let-inline \show-float f =
@@ -16,18 +18,28 @@ in
 
 document (|
   title = {csvtable Manual};
-  author = {Your Name};
+  author = {qwjyh};
+  show-title = true;
+  show-toc = true;
 |) '<
-  +p {
-    See `https://qiita.com/na4zagin3/items/b392f5d522f9bcc0493b` for the instruction in Japanese.
-  }
-  +chapter{Examples} <
-    +p {
-      ${\pi = \mathrm-token!(Float.to-string Csvtable.pi)}.
+  +section{概要}<
+    +p{
+      外部のCSVファイルを読み込んで\SATySFi;上の表に埋め込みます。
+      Easytableを使用しており、Easytableのインターフェースを用いたスタイルを適用することができます。
     }
-    +p {
-      Geometric mean of 1, 3, and 5 is
-      \show-float(Csvtable.geo-mean [1.; 3.; 5.]);
+  >
+  +section{使い方}<
+    +code(``\csvtable(`file.csv`);``);
+    +p{
+      でCSVファイルを読み込み、インラインテキスト中に表を埋め込みます。
+      デフォルトではCSVファイルの列数の最大値で折り返し、値はそれぞれのセルに右揃えで配置されます。
     }
+    +code(``\csvtable(`sample1.csv`);``);
+    +p{\csvtable(`sample1.csv`);}
+    +p{
+      オプション引数として、Easytableの\code(`cellfmt`);のリストを与えることで、Easytableと同様、中央揃えや左揃えにしたり、幅を指定することができます。
+    }
+    +code(``\csvtable?:[l;c;r](`./sample2.csv`);``);
+    +p{\csvtable?:[l;c;r](`./sample2.csv`);}
   >
 >

@@ -1,7 +1,7 @@
 opam-version: "2.0"
 name: "satysfi-csvtable-doc"
 version: "1.0.0"
-synopsis: "Document of SATySFi package to embed CSV into tables."
+synopsis: "Document of SATySFi package to embed CSV into tables"
 description: """
 Document of SATySFi package to embed CSV into tables.
 """
