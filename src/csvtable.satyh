@@ -11,7 +11,8 @@ module CsvTable :sig
   val csv-to-itlist: string -> inline-text list
   val csv-width: string -> int
 
-  direct \csvtable: [(cellfmt list)?; string] inline-cmd
+  direct \csvtable: [(ruleptn list)?; (cellfmt list)?; string] inline-cmd
+  direct +csvtable: [(ruleptn list)?; (cellfmt list)?; string] block-cmd
 
 end = struct
 
@@ -28,6 +29,8 @@ end = struct
     | []      -> []
     | x :: xs -> embed-string x :: stringlist-to-itlist xs 
   
+  % [[string]] -> string
+  % (string list) list -> string list
   let-rec stringlist-at0-to-itlist l =
     match l with
     | []      -> []
@@ -63,11 +66,13 @@ end = struct
   let csvresult-to-slist r =
     Result.map-or-else csv-error-notify stringlist-at0-to-itlist r
 
+  % string -> (inline-text list) list
   let-rec parse-readcsv-to-itlist sl =
     match sl with
     | []      -> []
     | x :: xs -> (csvresult-to-slist (CSV.parser x)) :: parse-readcsv-to-itlist xs
   
+  % (inline-text list) list -> inline-text list
   let-rec itlist2d-to-itlist l =
     match l with
     | []      -> []
@@ -89,9 +94,17 @@ end = struct
       |> get-maxlistlength-2dlist
 
   % [string] inline-cmd
-  let-inline ctx \csvtable ?:cfmlst s =
+  let-inline ctx \csvtable ?:rules-list-opt ?:cfmlst s =
     let slist = s |> read-file |> parse-readcsv-to-itlist in
     let cellfmts = cfmlst |> Option.from (make-cellfmtlist (get-maxlistlength-2dlist slist) r) in
-    read-inline ctx {\easytable (cellfmts) (itlist2d-to-itlist slist);} 
+    let rules-list = rules-list-opt |> Option.from [t;b; m 1;] in
+    read-inline ctx {\easytable?:(rules-list) (cellfmts) (itlist2d-to-itlist slist);} 
+
+  % [string] block-cmd
+  let-block ctx +csvtable ?:rules-list-opt ?:cfmlst s =
+    let slist = s |> read-file |> parse-readcsv-to-itlist in
+    let cellfmts = cfmlst |> Option.from (make-cellfmtlist (get-maxlistlength-2dlist slist) r) in
+    let rules-list = rules-list-opt |> Option.from [t;b; m 1;] in
+    read-block ctx '<+easytable (cellfmts) (itlist2d-to-itlist slist);>
 
 end
