@@ -1,0 +1,97 @@
+@require: option
+@require: base/result
+@require: base/int
+@require: base/list-ext
+@require: csv/csv
+@require: easytable/easytable
+open EasyTableAlias
+
+module CsvTable :sig
+
+  val csv-to-itlist: string -> inline-text list
+  val csv-width: string -> int
+
+  direct \csvtable: [(cellfmt list)?; string] inline-cmd
+
+end = struct
+
+  % int -> cellfmt -> cellfmt list
+  let-rec make-cellfmtlist l fmt =
+    if l == 0 then
+      []
+    else
+      fmt :: (make-cellfmtlist (l - 1) fmt)
+  
+  % string list -> inline-text list
+  let-rec stringlist-to-itlist l =
+    match l with
+    | []      -> []
+    | x :: xs -> embed-string x :: stringlist-to-itlist xs 
+  
+  let-rec stringlist-at0-to-itlist l =
+    match l with
+    | []      -> []
+    | x :: xs -> stringlist-to-itlist x
+    
+  % ('a list) list -> int
+  let-rec get-maxlistlength-2dlist l =
+      match l with
+      | []      -> 0
+      | x :: xs -> Int.max (List.length x) (get-maxlistlength-2dlist xs)
+  
+  % 'a csv-parser-error result -> Any
+  let csv-error-notify e =
+      let get-errormsg e =
+        match e with
+        | CSVParserErrorUnExpectedChar(i, s) ->
+            #`CSV parser error with char: `# ^ s ^ #` at `# ^ (arabic i)
+        | CSVParserErrorEOI ->
+            `CSV parser error (EOI)`  % i don't know what EOI means
+        in
+      (abort-with-message (get-errormsg e))
+  
+  % string list -> ((string list) list) csv-parser-error result
+  let parse-raw-csv sl =
+    let-rec raw-csv-to-string sl =
+      match sl with
+      | []      -> ` `
+      | x :: xs -> x ^ `,` ^ (raw-csv-to-string xs)
+      in
+    CSV.parser (raw-csv-to-string sl)
+
+  % ((string list) list) csv-parser-error result -> Any -> string list
+  let csvresult-to-slist r =
+    Result.map-or-else csv-error-notify stringlist-at0-to-itlist r
+
+  let-rec parse-readcsv-to-itlist sl =
+    match sl with
+    | []      -> []
+    | x :: xs -> (csvresult-to-slist (CSV.parser x)) :: parse-readcsv-to-itlist xs
+  
+  let-rec itlist2d-to-itlist l =
+    match l with
+    | []      -> []
+    | x :: xs -> List.append x (itlist2d-to-itlist xs)
+
+
+  % provided functions
+
+  % string -> inline-text list
+  let csv-to-itlist s =
+    s |> read-file
+      |> parse-readcsv-to-itlist
+      |> itlist2d-to-itlist
+
+  % string -> int
+  let csv-width s =
+    s |> read-file
+      |> parse-readcsv-to-itlist
+      |> get-maxlistlength-2dlist
+
+  % [string] inline-cmd
+  let-inline ctx \csvtable ?:cfmlst s =
+    let slist = s |> read-file |> parse-readcsv-to-itlist in
+    let cellfmts = cfmlst |> Option.from (make-cellfmtlist (get-maxlistlength-2dlist slist) r) in
+    read-inline ctx {\easytable (cellfmts) (itlist2d-to-itlist slist);} 
+
+end
