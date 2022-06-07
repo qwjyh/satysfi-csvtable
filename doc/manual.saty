@@ -6,8 +6,8 @@
 @require: base/typeset/base
 @require: base/float
 
-% @require: csvtable/csvtable
-@import: ../src/csvtable
+@require: csvtable/csvtable
+% @import: ../src/csvtable
 
 open EasyTableAlias
 
