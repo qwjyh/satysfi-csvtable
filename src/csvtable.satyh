@@ -10,8 +10,8 @@ module CsvTable :sig
   val csv-to-itlist: string ?-> string -> inline-text list
   val csv-width: string ?-> string -> int
 
-  direct \csvtable: [(ruleptn list)?; (cellfmt list)?; string?; string] inline-cmd
-  direct +csvtable: [(ruleptn list)?; (cellfmt list)?; string?; string] block-cmd
+  direct \csvtable: [(ruleptn list)?; (cellfmt list)?; string?; (inline-text list)?; string] inline-cmd
+  direct +csvtable: [(ruleptn list)?; (cellfmt list)?; string?; (inline-text list)?; string] block-cmd
 
 end = struct
 
@@ -90,6 +90,15 @@ end = struct
     | []      -> []
     | x :: xs -> fill-itlist n x :: fill-itlist2 n xs
 
+  let set-header headers itlistlist =
+    let replace-1st index source =
+      if index == 0 then
+        headers
+      else
+        source
+    in
+    List.mapi replace-1st itlistlist
+
 
   % provided functions
 
@@ -116,7 +125,7 @@ end = struct
            |> get-maxlistlength-2dlist
 
   % [string] inline-cmd
-  let-inline ctx \csvtable ?:rules-list-opt ?:cfmlst ?:sep-opt source =
+  let-inline ctx \csvtable ?:rules-list-opt ?:cfmlst ?:sep-opt ?:headers source =
     let separator =
       match sep-opt with
       | Some(s) -> s
@@ -126,11 +135,17 @@ end = struct
     let listwidth = get-maxlistlength-2dlist itlist in
     let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth EasyTableAlias.r) in
     let rules-list = rules-list-opt |> Option.from [EasyTableAlias.t; EasyTableAlias.b; EasyTableAlias.m 1;] in
-    let filled-itlist = fill-itlist2 listwidth itlist in
-    read-inline ctx {\easytable?:(rules-list) (cellfmts) (list2d-to-list filled-itlist);}
+    let content = 
+      if Option.is-some headers then
+        set-header (Option.unwrap headers) itlist
+      else
+        itlist
+    in
+    let filled-content = fill-itlist2 listwidth content in
+    read-inline ctx {\easytable?:(rules-list) (cellfmts) (list2d-to-list filled-content);}
 
   % [string] block-cmd
-  let-block ctx +csvtable ?:rules-list-opt ?:cfmlst ?:sep-opt source =
+  let-block ctx +csvtable ?:rules-list-opt ?:cfmlst ?:sep-opt ?:headers source =
     let separator =
       match sep-opt with
       | Some(s) -> s
@@ -140,7 +155,13 @@ end = struct
     let listwidth = get-maxlistlength-2dlist itlist in
     let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth EasyTableAlias.r) in
     let rules-list = rules-list-opt |> Option.from [EasyTableAlias.t; EasyTableAlias.b; EasyTableAlias.m 1;] in
-    let filled-itlist = fill-itlist2 listwidth itlist in
-    read-block ctx '<+easytable?:(rules-list) (cellfmts) (list2d-to-list filled-itlist);>
+    let content =
+      if Option.is-some headers then
+        set-header (Option.unwrap headers) itlist
+      else
+        itlist
+    in
+    let filled-content = fill-itlist2 listwidth content in
+    read-block ctx '<+easytable?:(rules-list) (cellfmts) (list2d-to-list filled-content);>
 
 end
