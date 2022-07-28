@@ -94,35 +94,35 @@ end = struct
   % provided functions
 
   % string -> inline-text list
-  let csv-to-itlist ?:sep-opt s =
+  let csv-to-itlist ?:sep-opt source =
     let separator =
       match sep-opt with
       | Some(s) -> s
       | None    -> `,`
       in
-    s |> read-file
-      |> parse-readcsv-to-itlist separator
-      |> list2d-to-list
+    source |> read-file
+           |> parse-readcsv-to-itlist separator
+           |> list2d-to-list
 
   % string -> int
-  let csv-width ?:sep-opt s =
+  let csv-width ?:sep-opt source =
     let separator =
       match sep-opt with
       | Some(s) -> s
       | None    -> `,`
       in
-    s |> read-file
-      |> parse-readcsv-to-itlist separator
-      |> get-maxlistlength-2dlist
+    source |> read-file
+           |> parse-readcsv-to-itlist separator
+           |> get-maxlistlength-2dlist
 
   % [string] inline-cmd
-  let-inline ctx \csvtable ?:rules-list-opt ?:cfmlst ?:sep-opt s =
+  let-inline ctx \csvtable ?:rules-list-opt ?:cfmlst ?:sep-opt source =
     let separator =
       match sep-opt with
       | Some(s) -> s
       | None    -> `,`
       in
-    let itlist = s |> read-file |> parse-readcsv-to-itlist separator in
+    let itlist = source |> read-file |> parse-readcsv-to-itlist separator in
     let listwidth = get-maxlistlength-2dlist itlist in
     let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth EasyTableAlias.r) in
     let rules-list = rules-list-opt |> Option.from [EasyTableAlias.t; EasyTableAlias.b; EasyTableAlias.m 1;] in
@@ -130,13 +130,13 @@ end = struct
     read-inline ctx {\easytable?:(rules-list) (cellfmts) (list2d-to-list filled-itlist);}
 
   % [string] block-cmd
-  let-block ctx +csvtable ?:rules-list-opt ?:cfmlst ?:sep-opt s =
+  let-block ctx +csvtable ?:rules-list-opt ?:cfmlst ?:sep-opt source =
     let separator =
       match sep-opt with
       | Some(s) -> s
       | None    -> `,`
       in
-    let itlist = s |> read-file |> parse-readcsv-to-itlist separator in
+    let itlist = source |> read-file |> parse-readcsv-to-itlist separator in
     let listwidth = get-maxlistlength-2dlist itlist in
     let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth EasyTableAlias.r) in
     let rules-list = rules-list-opt |> Option.from [EasyTableAlias.t; EasyTableAlias.b; EasyTableAlias.m 1;] in
