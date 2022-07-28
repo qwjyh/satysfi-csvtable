@@ -28,8 +28,7 @@ end = struct
     | []      -> []
     | x :: xs -> embed-string x :: stringlist-to-itlist xs 
   
-  % [[string]] -> string
-  % (string list) list -> string list
+  % (string list) list -> inline-text list
   let-rec stringlist-at0-to-itlist l =
     match l with
     | []      -> []
@@ -81,6 +80,7 @@ end = struct
     | []      -> []
     | x :: xs -> List.append x (list2d-to-list xs)
   
+  % int -> (('a list) list) -> (('a list) list)
   let-rec fill-itlist2 n l =
     let fill-itlist n l =
       let lack = n - List.length l in
