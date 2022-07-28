@@ -4,7 +4,6 @@
 @require: base/list-ext
 @require: csv/csv
 @require: easytable/easytable
-open EasyTableAlias
 
 module CsvTable :sig
 
@@ -44,14 +43,14 @@ end = struct
   
   % 'a csv-parser-error result -> Any
   let csv-error-notify row-n e =
-      let get-errormsg e =
-        match e with
-        | CSVParserErrorUnExpectedChar(i, s) ->
-            #`CSV parser error with char: `# ^ s ^ #` at `# ^ (arabic row-n) ^ #`, `# ^ (arabic i)
-        | CSVParserErrorEOI ->
-            `CSV parser error (EOI)`  % i don't know what EOI means
-        in
-      (abort-with-message (get-errormsg e))
+    let get-errormsg e =
+      match e with
+      | CSVParserErrorUnExpectedChar(i, s) ->
+          #`CSV parser error with char: `# ^ s ^ #` at `# ^ (arabic row-n) ^ #`, `# ^ (arabic i)
+      | CSVParserErrorEOI ->
+          `CSV parser error (EOI)`  % i don't know what EOI means
+      in
+    (abort-with-message (get-errormsg e))
   
   % string list -> ((string list) list) csv-parser-error result
   let parse-raw-csv sl =
@@ -125,8 +124,8 @@ end = struct
       in
     let itlist = s |> read-file |> parse-readcsv-to-itlist separator in
     let listwidth = get-maxlistlength-2dlist itlist in
-    let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth r) in
-    let rules-list = rules-list-opt |> Option.from [t;b; m 1;] in
+    let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth EasyTableAlias.r) in
+    let rules-list = rules-list-opt |> Option.from [EasyTableAlias.t; EasyTableAlias.b; EasyTableAlias.m 1;] in
     let filled-itlist = fill-itlist2 listwidth itlist in
     read-inline ctx {\easytable?:(rules-list) (cellfmts) (list2d-to-list filled-itlist);}
 
@@ -139,8 +138,8 @@ end = struct
       in
     let itlist = s |> read-file |> parse-readcsv-to-itlist separator in
     let listwidth = get-maxlistlength-2dlist itlist in
-    let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth r) in
-    let rules-list = rules-list-opt |> Option.from [t;b; m 1;] in
+    let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth EasyTableAlias.r) in
+    let rules-list = rules-list-opt |> Option.from [EasyTableAlias.t; EasyTableAlias.b; EasyTableAlias.m 1;] in
     let filled-itlist = fill-itlist2 listwidth itlist in
     read-block ctx '<+easytable?:(rules-list) (cellfmts) (list2d-to-list filled-itlist);>
 
