@@ -6,8 +6,8 @@
 @require: base/typeset/base
 @require: base/float
 
-@require: csvtable/csvtable
-% @import: ../src/csvtable
+% @require: csvtable/csvtable
+@import: ../src/csvtable
 
 open EasyTableAlias
 
@@ -16,6 +16,24 @@ let-inline \show-float f =
   f
   |> Float.to-string
   |> embed-string
+
+let-inline \show-string s = 
+  embed-string s
+
+% embbed external file into code
+let-block ctx +readcode s =
+  let br = #```
+    
+    ```# in
+  let sl = read-file s in
+  let-rec slist-to-string sl =
+    match sl with
+    | []      -> ` `
+    | x :: xs -> x ^ br ^ (slist-to-string xs)
+  in
+  let code = br ^ slist-to-string sl in
+  read-block ctx '<+code(code);>
+
 in
 
 document (|
@@ -37,9 +55,20 @@ document (|
       でCSVファイルを読み込み、インラインテキスト中およびブロックテキスト中に表を埋め込みます。
       デフォルトではCSVファイルの列数の最大値で折り返し、値はそれぞれのセルに右揃えで配置されます。
       列が足りない場合は空白のセルで埋められます。
+      なお、\SATySFi;の制約上、\code(`..`);を含む\code(`path`);は使用できません。
     }
     +code(``\csvtable(`sample1.csv`);``);
+    +pn{
+      \code(`sample1.csv`);の内容
+    }
+    +readcode(`./sample1.csv`);
     +csvtable(`sample1.csv`);
+    +code(``+csvtable(`/source/sample7.csv`);``);
+    +pn{
+      \code(`source/sample7.csv`);の内容
+    }
+    +readcode(`./source/sample7.csv`);
+    +csvtable(`/source/sample7.csv`);
     +subsection{体裁に関するオプション引数}<
       +p{
         オプション引数として、第一引数にEasytableの\code(`ruleptn`);のリスト、及び第二引数に\code(`cellfmt`);のリストを与えることで、Easytableと同様、中央揃えや左揃えにしたり幅を指定することができます。
@@ -59,6 +88,7 @@ document (|
     +subsection{CSVのパースに関するオプション引数}<
       +p{
         第三引数に\code(`string`);を渡すことによって、CSVの区切り文字を指定することが出来ます(デフォルトは\code(`,`);です)。
+        スペースを区切り文字として使用する際はSATySFiの\code(`string`);の記法に則り、\code(`` #` `# ``);と書きます。
       }
       +code(``
       +csvtable?:[rect]?*?:(`:`)(`./source/sample4.csv`);
@@ -81,6 +111,40 @@ document (|
       +pn{と出力します。}
       % the line below contains error
       % +csvtable(`./source/sample5.csv`);
+    >
+    +subsection{ヘッダーを上書きするオプション}<
+      +p{
+        第四引数に\code(`inline-text list`);を渡すことで、ヘッダーつまり表の1行目を上書きすることができます。
+        \code(`inline-text list`);型なのでもちろん数式を表示させることや画像や表を埋め込むこともできます。
+        \code(`inline-text list`);\code(`[{a}; {b}; {c};]`);の糖衣構文\code(`{| a | b | c |}`);を使えば簡潔に書くことができます。
+      }
+      +code(```
+      +csvtable?:[
+        bg-a (Color.gray 0.9);
+        bg-r (Color.gray 0.7) 0 1;
+        t; b; m 1;
+      ]?:[l; c; c; r; r]?*?:({
+        | Program
+        | Answer A
+        | Answer B
+        | ${Time} A
+        | ${Time} B
+      |})(`./source/sample7.csv`);
+      ```);
+      +csvtable?:[
+        bg-a (Color.gray 0.9);
+        bg-r (Color.gray 0.7) 0 1;
+        t; b; m 1;
+      ]?:[l; c; c; r; r]?*?:({
+        | Program
+        | Answer A
+        | Answer B
+        | ${Time} A
+        | ${Time} B
+        % | a
+        % | \csvtable?:[t; b; m 1]?:[l; c; r;](`./sample2.csv`);
+        % | \easytable[r; r;]{|h1 | h2 | c11 | c12 |}
+      |})(`./source/sample7.csv`);
     >
   >
 >
