@@ -160,7 +160,49 @@ document (|
           CSVの内容にかかわらずに\code(`easytable`);を使った場合とほぼ同等の表を作ることができます。
         }
       }
-      +file-code(`./sample1.csv`);
     >
+  >
+  +section{機能一覧}<
+    +pn{
+      \code(`csvtable?:(rule-pattern)?:(cell-format?:(separator)?:({| headers |})(source-path)`);
+    }
+    +easytable[l; l; l; l;]{
+      | 引数                    | 型                          | 種類                | 説明
+      | \code(`rule-pattern`);  | \code(`ruleptn list`);     | \code(`Optional`); | 罫線、背景色の設定
+      | \code(`cell-format`);   | \code(`cellfmt list`);     | \code(`Optional`); | ${n}番目の列の体裁
+      | \code(`separator`);     | \code(`string`);           | \code(`Optional`); | ソースCSVファイルの区切り文字
+      | \code(`headers`);       | \code(`inline-text list`); | \code(`Optional`); | ヘッダー
+      | \code(`source-path`);   | \code(`string`);           | \code(`Required`); | ソースCSVファイルのパス
+    |}
+    +pn{
+      \code(`inline-cmd`);、\code(`block-cmd`);両方あります。
+    }
+
+    +pn{
+      以下の関数はグローバルには公開されてないので、モジュール名\code(`CsvTable.`);をつけて使用する必要があります
+    }
+    +pn{
+      \code(`csv-to-itlist?:(separator)(source-path)`);
+    }
+    +easytable[l; l; l; l;]{
+      | 引数                    | 型                          | 種類                | 説明
+      | \code(`separator`);     | \code(`string`);           | \code(`Optional`); | ソースCSVファイルの区切り文字
+      | \code(`source-path`);   | \code(`string`);           | \code(`Required`); | ソースCSVファイルのパス
+    |}
+    +pn{
+      返り値は\code(`inlne-text list`);で、CSVファイルを区切り文字と改行文字でパースしたものを\code(`inline-text`);にしたものです。
+    }
+
+    +pn{
+      \code(`csv-width?:(separator)(source-path)`);
+    }
+    +easytable[l; l; l; l;]{
+      | 引数                    | 型                          | 種類                | 説明
+      | \code(`separator`);     | \code(`string`);           | \code(`Optional`); | ソースCSVファイルの区切り文字
+      | \code(`source-path`);   | \code(`string`);           | \code(`Required`); | ソースCSVファイルのパス
+    |}
+    +pn{
+      返り値は\code(`int`);で、CSVファイルの列の数の最大値です。
+    }
   >
 >
