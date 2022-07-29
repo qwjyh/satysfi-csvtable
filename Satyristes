@@ -31,7 +31,7 @@
   ;; Build commands
   (build
     ;; Run SATySFi
-    ((satysfi "manual.saty" "-o" "csvtable-manual-ja")))
+    ((satysfi "csvtable-manual-ja.saty" "-o" "csvtable-manual-ja")))
   ;; Files
   (sources
     ((doc "csvtable-manual-ja" "doc/csvtable-manual-ja")))

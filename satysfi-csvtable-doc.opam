@@ -22,7 +22,7 @@ depends: [
   "satysfi-dist"
   "satysfi-base"
   "satysfi-csv"
-  "satysfi-easytable" {>= "1.2.2" }
+  "satysfi-easytable" {>= "1.1.2" }
 ]
 build: [
   ["satyrographos" "opam" "build"
