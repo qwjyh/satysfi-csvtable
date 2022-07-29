@@ -133,15 +133,16 @@ end = struct
       in
     let itlist = source |> read-file |> parse-readcsv-to-itlist separator in
     let listwidth = get-maxlistlength-2dlist itlist in
-    let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth EasyTableAlias.r) in
     let rules-list = rules-list-opt |> Option.from [EasyTableAlias.t; EasyTableAlias.b; EasyTableAlias.m 1;] in
-    let content = 
+    let (content, contentwidth) =
       if Option.is-some headers then
-        set-header (Option.unwrap headers) itlist
+        (set-header (Option.unwrap headers) itlist,
+         if (List.length (Option.unwrap headers)) > listwidth then List.length (Option.unwrap headers) else listwidth)
       else
-        itlist
+        (itlist, listwidth)
     in
-    let filled-content = fill-itlist2 listwidth content in
+    let cellfmts = cfmlst |> Option.from (make-cellfmtlist contentwidth EasyTableAlias.r) in
+    let filled-content = fill-itlist2 contentwidth content in
     read-inline ctx {\easytable?:(rules-list) (cellfmts) (list2d-to-list filled-content);}
 
   % [string] block-cmd
@@ -153,15 +154,16 @@ end = struct
       in
     let itlist = source |> read-file |> parse-readcsv-to-itlist separator in
     let listwidth = get-maxlistlength-2dlist itlist in
-    let cellfmts = cfmlst |> Option.from (make-cellfmtlist listwidth EasyTableAlias.r) in
     let rules-list = rules-list-opt |> Option.from [EasyTableAlias.t; EasyTableAlias.b; EasyTableAlias.m 1;] in
-    let content =
+    let (content, contentwidth) =
       if Option.is-some headers then
-        set-header (Option.unwrap headers) itlist
+        (set-header (Option.unwrap headers) itlist,
+         if (List.length (Option.unwrap headers)) > listwidth then List.length (Option.unwrap headers) else listwidth)
       else
-        itlist
+        (itlist, listwidth)
     in
-    let filled-content = fill-itlist2 listwidth content in
+    let cellfmts = cfmlst |> Option.from (make-cellfmtlist contentwidth EasyTableAlias.r) in
+    let filled-content = fill-itlist2 contentwidth content in
     read-block ctx '<+easytable?:(rules-list) (cellfmts) (list2d-to-list filled-content);>
 
 end
