@@ -20,20 +20,6 @@ let-inline \show-float f =
 let-inline \show-string s = 
   embed-string s
 
-% embbed external file into code
-let-block ctx +readcode s =
-  let br = #```
-    
-    ```# in
-  let sl = read-file s in
-  let-rec slist-to-string sl =
-    match sl with
-    | []      -> ` `
-    | x :: xs -> x ^ br ^ (slist-to-string xs)
-  in
-  let code = br ^ slist-to-string sl in
-  read-block ctx '<+code(code);>
-
 in
 
 document (|
@@ -61,13 +47,13 @@ document (|
     +pn{
       \code(`sample1.csv`);の内容
     }
-    +readcode(`./sample1.csv`);
+    +file-code(`./sample1.csv`);
     +csvtable(`sample1.csv`);
     +code(``+csvtable(`/source/sample7.csv`);``);
     +pn{
       \code(`source/sample7.csv`);の内容
     }
-    +readcode(`./source/sample7.csv`);
+    +file-code(`./source/sample7.csv`);
     +csvtable(`/source/sample7.csv`);
     +subsection{体裁に関するオプション引数}<
       +p{
@@ -119,6 +105,16 @@ document (|
         \code(`inline-text list`);\code(`[{a}; {b}; {c};]`);の糖衣構文\code(`{| a | b | c |}`);を使えば簡潔に書くことができます。
       }
       +code(```
+      +p{
+        \csvtable?*?*?*?:({
+          | Program
+          | Answer A
+          | Answer B
+          | ${Time} A
+          | ${Time} B
+          | \csvtable?:[t; b; m 1]?:[l; c; r;](`./sample2.csv`);
+        |})(`./source/sample7.csv`);
+      }
       +csvtable?:[
         bg-a (Color.gray 0.9);
         bg-r (Color.gray 0.7) 0 1;
@@ -129,8 +125,19 @@ document (|
         | Answer B
         | ${Time} A
         | ${Time} B
+        | \csvtable?:[t; b; m 1]?:[l; c; r;](`./sample2.csv`);
       |})(`./source/sample7.csv`);
       ```);
+      +p{
+        \csvtable?*?*?*?:({
+          | Program
+          | Answer A
+          | Answer B
+          | ${Time} A
+          | ${Time} B
+          | \csvtable?:[t; b; m 1]?:[l; c; r;](`./sample2.csv`);
+        |})(`./source/sample7.csv`);
+      }
       +csvtable?:[
         bg-a (Color.gray 0.9);
         bg-r (Color.gray 0.7) 0 1;
@@ -141,10 +148,19 @@ document (|
         | Answer B
         | ${Time} A
         | ${Time} B
-        % | a
-        % | \csvtable?:[t; b; m 1]?:[l; c; r;](`./sample2.csv`);
-        % | \easytable[r; r;]{|h1 | h2 | c11 | c12 |}
+        | \csvtable?:[t; b; m 1]?:[l; c; r;](`./sample2.csv`);
       |})(`./source/sample7.csv`);
+      +p{
+        \emph{列の数について:}
+        上の1つ目の例のように、\code(`headers`);としてCSVの列数の最大値より長いリストを与えた場合、
+        表の列の数も\code(`headers`);の長さに従います。
+        しかし、上の2つ目の例のように\code(`cellfmt`);を与えた場合はそれに従った列の折り返しをします。
+        \footnote{
+          従って、1行しかないCSVを与えて\code(`header`);を指定すると、
+          CSVの内容にかかわらずに\code(`easytable`);を使った場合とほぼ同等の表を作ることができます。
+        }
+      }
+      +file-code(`./sample1.csv`);
     >
   >
 >
